@@ -209,7 +209,7 @@ int _tmain(int argc, TCHAR *argv[])
 	hack_detection = (sz_common >= (sz_check / 2));
 	if (hack_detection) {
 		// TODO: Colorize "* HACK DETECTION *" on Windows and Linux.
-		_tprintf(_T("\n*** HACK DETECTION ***)\n\n"));
+		_tprintf(_T("\n*** HACK DETECTION ***\n\n"));
 	} else {
 		_tprintf(_T("\n"));
 	}
