@@ -118,6 +118,7 @@ static void print_hack_detection(void)
 	HANDLE hStdOut;
 	CONSOLE_SCREEN_BUFFER_INFO csbi;
 	WORD old_color_attrs;
+	BOOL bIsEnd = FALSE;
 #endif /* _WIN32 */
 
 	// Is this a TTY?
@@ -158,9 +159,14 @@ static void print_hack_detection(void)
 	    (csbi.dwCursorPosition.Y + 1) >= csbi.dwSize.Y)
 	{
 		csbi.dwSize.X--;
+		bIsEnd = TRUE;
 	}
 	_tprintf(_T(" ***%*s%*s"), rbside, "", csbi.dwSize.X, "");
 	SetConsoleTextAttribute(hStdOut, old_color_attrs);
+	// We need to print a newline here if we're at the end of the buffer.
+	if (bIsEnd) {
+		_tprintf(_T("\n"));
+	}
 #else /* !_WIN32 */
 	// Linux terminal. Use ANSI escape sequences.
 
