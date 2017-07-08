@@ -170,8 +170,12 @@ int _tmain(int argc, TCHAR *argv[])
 	if (argc >= 2 && (!_tcscmp(argv[1], _T("-h")) || !_tcscmp(argv[1], _T("--help")))) {
 		// Usage information.
 		_ftprintf(stderr,
-			_T("HACK DETECTION!\n")
-			_T("Check if a hacked ROM is a hex-edited hack.\n")
+			_T("*** HACK DETECTION ***\n")
+			_T("Check if a hacked ROM is a hex-edited binary hack.\n")
+			_T("\n")
+			_T("Copyright (c) 2017 by David Korth.\n")
+			_T("Licensed under the GNU AGPLv3 or later.\n")
+			_T("https://github.com/GerbilSoft/hack-detection\n")
 			_T("\n")
 			_T("Syntax: %s [source ROM] [hacked ROM]\n")
 			_T("- [source ROM]: The original ROM image.\n")
