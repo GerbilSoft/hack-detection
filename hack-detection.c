@@ -221,10 +221,11 @@ int _tmain(int argc, TCHAR *argv[])
 		// Calculate the percentage.
 		pct = (int)floor(((double)sz_common / (double)sz_check) * 1000);
 	}
-	
-	_tprintf(_T("%u of %u bytes (%01d.%01d%%) are common between both the\n")
-		_T("source ROM and the hacked ROM.\n\n"),
-		sz_common, sz_check, pct/10, pct%10);
+
+	_tprintf(_T("- Identical bytes: %u\n")
+		_T("- Differing bytes: %u\n")
+		_T("- Matching percentage: %01d.%01d%%\n\n"),
+		sz_common, sz_check-sz_common, pct/10, pct%10);
 	if (hack_detection) {
 		_tprintf(_T("The hacked ROM is most likely a hex-edited binary hack.\n"));
 	} else {
