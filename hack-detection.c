@@ -17,11 +17,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.    *
  ****************************************************************************/
 
-#ifdef _MSC_VER
-// MSVC: Use 64-bit file offset functions.
-# define fseek _fseeki64
-# define ftell _ftelli64
-#else
+#ifndef _MSC_VER
 // MinGW/Unix: Use Large File Support if necessary.
 # define _LARGEFILE_SOURCE 1
 # define _LARGEFILE64_SOURCE 1
@@ -33,6 +29,12 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
+
+#ifdef _MSC_VER
+// MSVC: Use 64-bit file offset functions.
+# define fseek _fseeki64
+# define ftell _ftelli64
+#endif
 
 int main(int argc, char *argv[])
 {
@@ -51,6 +53,8 @@ int main(int argc, char *argv[])
 	// Temporary pointers within p_src/p_hack.
 	const uint8_t *pc_src, *pc_hack;
 
+	// Other temporaries.
+	uint32_t ui32;
 	int ret = EXIT_FAILURE;
 
 	if (argc >= 2 && (!strcmp(argv[1], "-h") || !strcmp(argv[1], "--help"))) {
@@ -178,7 +182,7 @@ int main(int argc, char *argv[])
 	pc_src = p_src;
 	pc_hack = p_hack;
 	sz_common = 0;
-	for (uint32_t i = sz_check; i > 0; i--, pc_src++, pc_hack++) {
+	for (ui32 = sz_check; ui32 > 0; ui32--, pc_src++, pc_hack++) {
 		if (*pc_src == *pc_hack) {
 			sz_common++;
 		}
