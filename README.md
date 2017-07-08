@@ -19,7 +19,7 @@ $ hack-detection [Source ROM] [Hacked ROM]
 ```
 
 * Source ROM: The original ROM, e.g. "Sonic 1 Rev00.gen".
-* Hacked ROM: The hacked ROM, e.g. "Sonic 1337.bin".
+* Hacked ROM: The hacked ROM, e.g. "Sonic 1337.gen".
 
 ## Screenshots
 
