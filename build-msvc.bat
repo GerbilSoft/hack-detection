@@ -1,4 +1,4 @@
-set "CFLAGS=/nologo /O2 /MD /EHsc /Zi /W3"
+set "CFLAGS=/nologo /O2 /MT /EHsc /Zi /W3"
 set "RCFLAGS=/nologo"
 set "LDFLAGS=/nologo /debug /opt:icf,ref /incremental:no"
 CL /c %CFLAGS% /Fohack-detection.o hack-detection.c
