@@ -1,0 +1,6 @@
+hack-detection
+*.o
+*.debug
+*.exe
+*.obj
+*.pdb
