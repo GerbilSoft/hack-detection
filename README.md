@@ -42,5 +42,5 @@ TARGET=i686-w64-mingw32 ISWIN=1 ./build-gcc.sh
 
 ## License
 
-hack-detection is licensed under the GNU AGPLv3. See [LICENSE.md](LICENSE.md)
+hack-detection is licensed under the GNU AGPLv3. See [LICENSE](LICENSE)
 for more information.
