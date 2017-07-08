@@ -4,3 +4,4 @@ hack-detection
 *.exe
 *.obj
 *.pdb
+*.ilk
