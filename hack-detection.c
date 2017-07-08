@@ -21,6 +21,9 @@
 // Enable Unicode functions.
 #define UNICODE 1
 #define _UNICODE 1
+#else
+// Enable POSIX functions. [fileno()]
+#define _POSIX_C_SOURCE 1
 #endif
 
 #ifdef _MSC_VER
@@ -42,6 +45,13 @@
 #include <stdint.h>
 #include <string.h>
 
+#ifdef _WIN32
+#include <io.h>
+#else /* !_WIN32 */
+#include <sys/ioctl.h>
+#include <unistd.h>
+#endif
+
 #ifdef _MSC_VER
 // MSVC: Use 64-bit file offset functions.
 # define fseek _fseeki64
@@ -50,6 +60,90 @@
 
 // TCHAR definitions for non-Windows systems.
 #include "tchar_xplt.h"
+
+/**
+ * Is this a valid TTY?
+ * @return 0 if not a TTY; non-zero if it is.
+ */
+static int is_a_tty(void)
+{
+	// Check if the output stream supports color.
+	// (Based on Google Test.)
+#ifdef _WIN32
+	// FIXME: _isatty() might not work properly on Win8+ with MinGW.
+	// Reference: https://lists.gnu.org/archive/html/bug-gnulib/2013-01/msg00007.html
+	if (_isatty(_fileno(stdout))) {
+		// This is a TTY.
+		return 1;
+	}
+#else /* !_WIN32 */
+	if (isatty(fileno(stdout))) {
+		// On Unix/Linux, check the terminal
+		// to see if it actually supports color.
+		const char *const term = getenv("TERM");
+		if (!term)
+			return 0;
+
+		if (!strcmp(term, "xterm") ||
+		    !strcmp(term, "xterm-color") ||
+		    !strcmp(term, "xterm-256color") ||
+		    !strcmp(term, "screen") ||
+		    !strcmp(term, "screen-256color") ||
+		    !strcmp(term, "linux") ||
+		    !strcmp(term, "cygwin"))
+		{
+			// Terminal supports color.
+			return 1;
+		}
+	}
+#endif /* _WIN32 */
+
+	// No colors...
+	return 0;
+}
+
+/**
+ * Print the "HACK DETECTION" banner.
+ */
+static void print_hack_detection(void)
+{
+	// Is this a TTY?
+	if (!is_a_tty()) {
+		// Not a TTY. Print a generic banner.
+		_tprintf(_T("*** HACK DETECTION ***\n"));
+		return;
+	}
+
+#ifdef _WIN32
+	// TODO: Win32 console.
+	_tprintf(_T("*** HACK DETECTION ***\n"));
+	return;
+#else /* !_WIN32 */
+	// Linux terminal. Use ANSI escape sequences.
+
+	// Get the terminal size.
+	struct winsize sz;
+	if (ioctl(0, TIOCGWINSZ, &sz) != 0 ||
+	    sz.ws_row < 4 || sz.ws_col < 24)
+	{
+		// Could not get the terminal size,
+		// or the terminal is too small.
+		// Fall back to the standard banner.
+		_tprintf(_T("*** HACK DETECTION ***\n"));
+		return;
+	}
+
+	// Print a line with a green background.
+	const int lbside = (sz.ws_col - 22) / 2;
+	const int rbside = lbside + (sz.ws_col % 2);
+	_tprintf(_T("\x1B[0m")
+		_T("\x1B[37;1m\x1B[42m%*s")
+		_T("%*s*** \x1B[33;1mHACK DETECTION\x1B[37;1m ***%*s")
+		_T("%*s")
+		_T("\x1B[0m\n")
+		, sz.ws_col, "", lbside, "", rbside, "", sz.ws_col, "");
+#endif
+}
 
 int _tmain(int argc, TCHAR *argv[])
 {
@@ -208,8 +302,9 @@ int _tmain(int argc, TCHAR *argv[])
 	// this is probably a binary hack.
 	hack_detection = (sz_common >= (sz_check / 2));
 	if (hack_detection) {
-		// TODO: Colorize "* HACK DETECTION *" on Windows and Linux.
-		_tprintf(_T("\n*** HACK DETECTION ***\n\n"));
+		_tprintf(_T("\n"));
+		print_hack_detection();
+		_tprintf(_T("\n"));
 	} else {
 		_tprintf(_T("\n"));
 	}
