@@ -1,3 +1,8 @@
-set "CFLAGS=/O2 /MD /EHsc /Zi /W3"
-set "LDFLAGS=/debug /opt:icf,ref /incremental:no"
-CL %CFLAGS% /Fehack-detection.exe hack-detection.c /link %LDFLAGS%
+set "CFLAGS=/nologo /O2 /MD /EHsc /Zi /W3"
+set "RCFLAGS=/nologo"
+set "LDFLAGS=/nologo /debug /opt:icf,ref /incremental:no"
+CL /c %CFLAGS% /Fohack-detection.o hack-detection.c
+@IF ERRORLEVEL 1 EXIT /B %ERRORLEVEL%
+RC %RCFLAGS% /foresource.res resource.rc
+@IF ERRORLEVEL 1 EXIT /B %ERRORLEVEL%
+LINK hack-detection.o resource.res %LDFLAGS%

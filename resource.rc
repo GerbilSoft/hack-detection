@@ -1,0 +1,63 @@
+/****************************************************************************
+ * HACK DETECTION! HACK DETECTION! HACK DETECTION? HACK DETECTION!          *
+ *                                                                          *
+ * Copyright (c) 2017 by David Korth.                                       *
+ *                                                                          *
+ * This program is free software: you can redistribute it and/or modify     *
+ * it under the terms of the GNU Affero General Public License as           *
+ * published by the Free Software Foundation, either version 3 of the       *
+ * License, or (at your option) any later version.                          *
+ *                                                                          *
+ * This program is distributed in the hope that it will be useful,          *
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of           *
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the            *
+ * GNU Affero General Public License for more details.                      *
+ *                                                                          *
+ * You should have received a copy of the GNU Affero General Public License *
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.    *
+ ****************************************************************************/
+
+#include <windows.h>
+
+/** Manifest. **/
+CREATEPROCESS_MANIFEST_RESOURCE_ID	RT_MANIFEST	"hack-detection.exe.manifest"
+
+/** Icons. **/
+// TODO
+//1	ICON	"hack-detection.ico"
+
+/** Application version. **/
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+VS_VERSION_INFO VERSIONINFO
+	FILEVERSION 1,0,0,0
+	PRODUCTVERSION 1,0,0,0
+	FILEFLAGSMASK VS_FFI_FILEFLAGSMASK
+	FILEFLAGS 0
+	FILEOS VOS_NT_WINDOWS32
+	FILETYPE VFT_APP
+	FILESUBTYPE 0x0L
+BEGIN
+	BLOCK "StringFileInfo"
+	BEGIN
+		/* English (US), Unicode */
+		BLOCK "040904B0"
+		BEGIN
+			//VALUE "Comments", "\0"
+			//VALUE "CompanyName", "\0"
+			VALUE "FileDescription", "*** HACK DETECTION ***\0"
+			VALUE "FileVersion", "hack-detection 1.0.0.0\0"
+			VALUE "InternalName", "hack-detection\0"
+			VALUE "LegalCopyright", "Copyright (c) 2017 by David Korth.\0"
+			//VALUE "LegalTrademarks", "\0"
+			//VALUE "OriginalFilename", "\0"
+			//VALUE "PrivateBuild", "\0"
+			VALUE "ProductName", "*** HACK DETECTION ***\0"
+			VALUE "ProductVersion", "hack-detection 1.0.0.0\0"
+			//VALUE "SpecialBuild", "\0"
+		END
+	END
+	BLOCK "VarFileInfo"
+	BEGIN
+		VALUE "Translation", 0x409, 1200
+	END
+END
