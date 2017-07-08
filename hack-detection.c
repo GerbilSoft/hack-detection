@@ -149,7 +149,7 @@ static void print_hack_detection(void)
 	lbside = (csbi.dwSize.X - 22) / 2;
 	rbside = lbside + (csbi.dwSize.X % 2);
 	SetConsoleTextAttribute(hStdOut, BACKGROUND_GREEN | FOREGROUND_WHITE | FOREGROUND_INTENSITY);
-	_tprintf(_T("%*s%*s*** "), csbi.dwSize.X, "", lbside, "");
+	_tprintf(_T("%*s%*s*** "), csbi.dwSize.X, _T(""), lbside, _T(""));
 	SetConsoleTextAttribute(hStdOut, BACKGROUND_GREEN | FOREGROUND_YELLOW | FOREGROUND_INTENSITY);
 	_tprintf(_T("HACK DETECTION"));
 	SetConsoleTextAttribute(hStdOut, BACKGROUND_GREEN | FOREGROUND_WHITE | FOREGROUND_INTENSITY);
@@ -162,7 +162,7 @@ static void print_hack_detection(void)
 		csbi.dwSize.X--;
 		bIsEnd = TRUE;
 	}
-	_tprintf(_T(" ***%*s%*s"), rbside, "", csbi.dwSize.X, "");
+	_tprintf(_T(" ***%*s%*s"), rbside, _T(""), csbi.dwSize.X, _T(""));
 	SetConsoleTextAttribute(hStdOut, old_color_attrs);
 	// We need to print a newline here if we're at the end of the buffer.
 	if (bIsEnd) {
