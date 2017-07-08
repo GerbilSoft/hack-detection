@@ -15,16 +15,23 @@ if [ -z "${ISWIN}" ]; then
 			;;
 	esac
 fi
-if [ ! -z "${TARGET}" ]; then
-	CC=${TARGET}-gcc
-	OBJCOPY=${TARGET}-objcopy
-	STRIP=${TARGET}-strip
-	RC=${TARGET}-windres
-else
+if [ -z "${CC}" ]; then
 	CC=gcc
+fi
+if [ -z "${OBJCOPY}" ]; then
 	OBJCOPY=objcopy
+fi
+if [ -z "${STRIP}" ]; then
 	STRIP=strip
+fi
+if [ -z "${RC}" ]; then
 	RC=windres
+fi
+if [ ! -z "${TARGET}" ]; then
+	CC=${TARGET}-${CC}
+	OBJCOPY=${TARGET}-${OBJCOPY}
+	STRIP=${TARGET}-${STRIP}
+	RC=${TARGET}-${RC}
 fi
 
 CFLAGS="-O2 -Wall -Wextra -std=c99"
