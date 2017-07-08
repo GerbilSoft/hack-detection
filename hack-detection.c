@@ -47,6 +47,11 @@
 
 #ifdef _WIN32
 #include <io.h>
+// Windows headers are needed for console attributes.
+#define WIN32_LEAN_AND_MEAN 1
+#include <windows.h>
+#define FOREGROUND_WHITE (FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE)
+#define FOREGROUND_YELLOW (FOREGROUND_RED | FOREGROUND_GREEN)
 #else /* !_WIN32 */
 #include <sys/ioctl.h>
 #include <unistd.h>
@@ -107,6 +112,14 @@ static int is_a_tty(void)
  */
 static void print_hack_detection(void)
 {
+	int lbside, rbside;
+#ifdef _WIN32
+	// Needed because MSVC prior to 2015 doesn't support C99.
+	HANDLE hStdOut;
+	CONSOLE_SCREEN_BUFFER_INFO csbi;
+	WORD old_color_attrs;
+#endif /* _WIN32 */
+
 	// Is this a TTY?
 	if (!is_a_tty()) {
 		// Not a TTY. Print a generic banner.
@@ -115,9 +128,39 @@ static void print_hack_detection(void)
 	}
 
 #ifdef _WIN32
-	// TODO: Win32 console.
-	_tprintf(_T("*** HACK DETECTION ***\n"));
-	return;
+	// Get the window size.
+	hStdOut = GetStdHandle(STD_OUTPUT_HANDLE);
+	if (!hStdOut || hStdOut == INVALID_HANDLE_VALUE ||
+	    !GetConsoleScreenBufferInfo(hStdOut, &csbi) ||
+	    csbi.dwSize.X < 4 || csbi.dwSize.Y < 24)
+	{
+		// Failed to get the console screen buffer info.
+		// Print a generic banner.
+		_tprintf(_T("*** HACK DETECTION ***\n"));
+	}
+
+	// Print "*** HACK DETECTION ***".
+	// - Background: Dark green
+	// - Asterisks: Bright white
+	// - Text: Bright yellow
+	old_color_attrs = csbi.wAttributes;
+	lbside = (csbi.dwSize.X - 22) / 2;
+	rbside = lbside + (csbi.dwSize.X % 2);
+	SetConsoleTextAttribute(hStdOut, BACKGROUND_GREEN | FOREGROUND_WHITE | FOREGROUND_INTENSITY);
+	_tprintf(_T("%*s%*s*** "), csbi.dwSize.X, "", lbside, "");
+	SetConsoleTextAttribute(hStdOut, BACKGROUND_GREEN | FOREGROUND_YELLOW | FOREGROUND_INTENSITY);
+	_tprintf(_T("HACK DETECTION"));
+	SetConsoleTextAttribute(hStdOut, BACKGROUND_GREEN | FOREGROUND_WHITE | FOREGROUND_INTENSITY);
+	// NOTE: If printing past the end of the console buffer, we have to
+	// subtract 1 from csbi.dwSize.X in order to not print an extra line
+	// with a green background.
+	if (GetConsoleScreenBufferInfo(hStdOut, &csbi) &&
+	    (csbi.dwCursorPosition.Y + 1) >= csbi.dwSize.Y)
+	{
+		csbi.dwSize.X--;
+	}
+	_tprintf(_T(" ***%*s%*s"), rbside, "", csbi.dwSize.X, "");
+	SetConsoleTextAttribute(hStdOut, old_color_attrs);
 #else /* !_WIN32 */
 	// Linux terminal. Use ANSI escape sequences.
 
@@ -133,9 +176,12 @@ static void print_hack_detection(void)
 		return;
 	}
 
-	// Print a line with a green background.
-	const int lbside = (sz.ws_col - 22) / 2;
-	const int rbside = lbside + (sz.ws_col % 2);
+	// Print "*** HACK DETECTION ***".
+	// - Background: Dark green
+	// - Asterisks: Bright white
+	// - Text: Bright yellow
+	lbside = (sz.ws_col - 22) / 2;
+	rbside = lbside + (sz.ws_col % 2);
 	_tprintf(_T("\x1B[0m")
 		_T("\x1B[37;1m\x1B[42m%*s")
 		_T("%*s*** \x1B[33;1mHACK DETECTION\x1B[37;1m ***%*s")
