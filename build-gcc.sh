@@ -30,7 +30,8 @@ LDFLAGS="-lm"
 EXE=hack-detection
 DEBUG=hack-detection.debug
 if [ "${ISWIN}" == "1" ]; then
-	EXE=${EXE}.exe
+	LDFLAGS="${LDFLAGS} -municode"
+	EXE="${EXE}.exe"
 fi
 
 echo CC=${CC}
