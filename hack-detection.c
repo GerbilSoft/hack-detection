@@ -23,7 +23,12 @@
 #define _UNICODE 1
 #endif
 
-#ifndef _MSC_VER
+#ifdef _MSC_VER
+// MSVC: Disable "secure" CRT warnings.
+#define _CRT_SECURE_NO_WARNINGS 1
+#define _CRT_SECURE_NO_DEPRECATE 1
+#define _CRT_NONSTDC_NO_DEPRECATE 1
+#else /* !_MSC_VER */
 // MinGW/Unix: Use Large File Support if necessary.
 # define _LARGEFILE_SOURCE 1
 # define _LARGEFILE64_SOURCE 1
@@ -214,7 +219,7 @@ int _tmain(int argc, TCHAR *argv[])
 		pct = 1000;
 	} else {
 		// Calculate the percentage.
-		pct = floor(((double)sz_common / (double)sz_check) * 1000);
+		pct = (int)floor(((double)sz_common / (double)sz_check) * 1000);
 	}
 	
 	_tprintf(_T("%u of %u bytes (%01d.%01d%%) are common between both the\n")
