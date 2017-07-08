@@ -110,10 +110,12 @@ static int is_a_tty(void)
 
 /**
  * Print the "HACK DETECTION" banner.
+ * @param is_copy 0 for "HACK"; 1 for "COPY".
  */
-static void print_hack_detection(void)
+static void print_hack_detection(int is_copy)
 {
 	int lbside, rbside;
+	const TCHAR *const hc = (is_copy ? _T("COPY") : _T("HACK"));
 #ifdef _WIN32
 	// Needed because MSVC prior to 2015 doesn't support C99.
 	HANDLE hStdOut;
@@ -125,7 +127,7 @@ static void print_hack_detection(void)
 	// Is this a TTY?
 	if (!is_a_tty()) {
 		// Not a TTY. Print a generic banner.
-		_tprintf(_T("*** HACK DETECTION ***\n"));
+		_tprintf(_T("*** %s DETECTION ***\n"), hc);
 		return;
 	}
 
@@ -138,7 +140,7 @@ static void print_hack_detection(void)
 	{
 		// Failed to get the console screen buffer info.
 		// Print a generic banner.
-		_tprintf(_T("*** HACK DETECTION ***\n"));
+		_tprintf(_T("*** %s DETECTION ***\n"), hc);
 	}
 
 	// Print "*** HACK DETECTION ***".
@@ -151,7 +153,7 @@ static void print_hack_detection(void)
 	SetConsoleTextAttribute(hStdOut, BACKGROUND_GREEN | FOREGROUND_WHITE | FOREGROUND_INTENSITY);
 	_tprintf(_T("%*s%*s*** "), csbi.dwSize.X, _T(""), lbside, _T(""));
 	SetConsoleTextAttribute(hStdOut, BACKGROUND_GREEN | FOREGROUND_YELLOW | FOREGROUND_INTENSITY);
-	_tprintf(_T("HACK DETECTION"));
+	_tprintf(_T("%s DETECTION"), hc);
 	SetConsoleTextAttribute(hStdOut, BACKGROUND_GREEN | FOREGROUND_WHITE | FOREGROUND_INTENSITY);
 	// NOTE: If printing past the end of the console buffer, we have to
 	// subtract 1 from csbi.dwSize.X in order to not print an extra line
@@ -179,7 +181,7 @@ static void print_hack_detection(void)
 		// Could not get the terminal size,
 		// or the terminal is too small.
 		// Fall back to the standard banner.
-		_tprintf(_T("*** HACK DETECTION ***\n"));
+		_tprintf(_T("*** %s DETECTION ***\n"), hc);
 		return;
 	}
 
@@ -191,10 +193,10 @@ static void print_hack_detection(void)
 	rbside = lbside + (sz.ws_col % 2);
 	_tprintf(_T("\x1B[0m")
 		_T("\x1B[37;1m\x1B[42m%*s")
-		_T("%*s*** \x1B[33;1mHACK DETECTION\x1B[37;1m ***%*s")
+		_T("%*s*** \x1B[33;1m%s DETECTION\x1B[37;1m ***%*s")
 		_T("%*s")
 		_T("\x1B[0m\n")
-		, sz.ws_col, "", lbside, "", rbside, "", sz.ws_col, "");
+		, sz.ws_col, "", lbside, "", hc, rbside, "", sz.ws_col, "");
 #endif
 }
 
@@ -234,6 +236,7 @@ int _tmain(int argc, TCHAR *argv[])
 	uint32_t sz_common;	// Number of bytes the two ROMs have in common.
 	int pct;		// Percentage, times 10.
 	int hack_detection;	// Non-zero if a binary hack is detected.
+	int is_copy;		// Non-zero if sz_check == sz_common.
 
 	// Temporary pointers within p_src/p_hack.
 	const uint8_t *pc_src, *pc_hack;
@@ -394,9 +397,10 @@ int _tmain(int argc, TCHAR *argv[])
 	// If more than 50% of the bytes are common,
 	// this is probably a binary hack.
 	hack_detection = (sz_common >= (sz_check / 2));
+	is_copy = (sz_common == sz_check);
 	if (hack_detection) {
 		_tprintf(_T("\n"));
-		print_hack_detection();
+		print_hack_detection(is_copy);
 		_tprintf(_T("\n"));
 	} else {
 		_tprintf(_T("\n"));
@@ -415,7 +419,13 @@ int _tmain(int argc, TCHAR *argv[])
 		_T("- Differing bytes: %u\n")
 		_T("- Matching percentage: %01d.%01d%%\n\n"),
 		sz_check, sz_common, sz_check-sz_common, pct/10, pct%10);
-	if (hack_detection) {
+	if (is_copy) {
+		if (sz_check == sz_src) {
+			_tprintf(_T("Both ROM images are identical.\n"));
+		} else {
+			_tprintf(_T("Both ROM images have identical content, ignoring padding.\n"));
+		}
+	} else if (hack_detection) {
 		_tprintf(_T("The hacked ROM is most likely a hex-edited binary hack.\n"));
 	} else {
 		_tprintf(_T("The hacked ROM is either a disassembly hack or not related\n")
