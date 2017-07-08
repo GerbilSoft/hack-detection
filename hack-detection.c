@@ -47,6 +47,7 @@
 
 #ifdef _WIN32
 #include <io.h>
+#include <conio.h> /* for kbhit() */
 // Windows headers are needed for console attributes.
 #define WIN32_LEAN_AND_MEAN 1
 #include <windows.h>
@@ -197,6 +198,28 @@ static void print_hack_detection(void)
 #endif
 }
 
+/**
+ * Show program usage.
+ * @param argv0 argv[0]
+ */
+static void show_usage(const TCHAR *argv0)
+{
+	_ftprintf(stderr,
+		_T("*** HACK DETECTION ***\n")
+		_T("Check if a hacked ROM is a hex-edited binary hack.\n")
+		_T("\n")
+		_T("Copyright (c) 2017 by David Korth.\n")
+		_T("Licensed under the GNU AGPLv3 or later.\n")
+		_T("https://github.com/GerbilSoft/hack-detection\n")
+		_T("\n")
+		_T("Syntax: %s [source ROM] [hacked ROM]\n")
+		_T("- [source ROM]: The original ROM image.\n")
+		_T("- [hacked ROM]: The hacked ROM image.\n")
+		_T("\n")
+		_T("Both ROM images must be at least 32 KB and less than 16 MB.\n"),
+		argv0);
+}
+
 int _tmain(int argc, TCHAR *argv[])
 {
 	// Allocated memory.
@@ -219,29 +242,35 @@ int _tmain(int argc, TCHAR *argv[])
 	uint32_t ui32;
 	int ret = EXIT_FAILURE;
 
+#ifdef _WIN32
+	// Windows: Was this run from a console window or from Explorer?
+	// Reference: https://stackoverflow.com/questions/510805/can-a-win32-console-application-detect-if-it-has-been-run-from-the-explorer-or-n
+	BOOL bIsExplorer = FALSE;
+	CONSOLE_SCREEN_BUFFER_INFO csbi;
+	if (GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi) != 0) {
+		bIsExplorer = (csbi.dwCursorPosition.X == 0 && csbi.dwCursorPosition.Y == 0);
+	}
+
+	if (argc == 1 && bIsExplorer) {
+		// User double-clicked the program.
+		// Show usage information.
+		show_usage(argv[0]);
+		ret = EXIT_SUCCESS;
+		goto cleanup;
+	}
+#endif /* _WIN32 */
+
 	if (argc >= 2 && (!_tcscmp(argv[1], _T("-h")) || !_tcscmp(argv[1], _T("--help")))) {
 		// Usage information.
-		_ftprintf(stderr,
-			_T("*** HACK DETECTION ***\n")
-			_T("Check if a hacked ROM is a hex-edited binary hack.\n")
-			_T("\n")
-			_T("Copyright (c) 2017 by David Korth.\n")
-			_T("Licensed under the GNU AGPLv3 or later.\n")
-			_T("https://github.com/GerbilSoft/hack-detection\n")
-			_T("\n")
-			_T("Syntax: %s [source ROM] [hacked ROM]\n")
-			_T("- [source ROM]: The original ROM image.\n")
-			_T("- [hacked ROM]: The hacked ROM image.\n")
-			_T("\n")
-			_T("Both ROM images must be at least 32 KB and less than 16 MB.\n"),
-			argv[0]);
-		return EXIT_SUCCESS;
+		show_usage(argv[0]);
+		ret = EXIT_SUCCESS;
+		goto cleanup;
 	}
 
 	if (argc != 3) {
 		_ftprintf(stderr, _T("Syntax: %s [source ROM] [hacked ROM]\n")
 			_T("Try '%s --help' for more information.\n"), argv[0], argv[0]);
-		return EXIT_FAILURE;
+		goto cleanup;
 	}
 
 	// Open the source ROM.
@@ -396,5 +425,16 @@ cleanup:
 	}
 	free(p_src);
 	free(p_hack);
+
+#ifdef _WIN32
+	if (bIsExplorer) {
+		// Wait for the user to press Enter before exiting.
+		_tprintf(_T("Press any key to continue . . . "));
+		fflush(stdout);
+		while (_kbhit() == 0) {
+			Sleep(100);
+		}
+	}
+#endif /* _WIN32 */
 	return ret;
 }
