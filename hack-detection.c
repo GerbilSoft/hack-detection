@@ -239,6 +239,7 @@ int _tmain(int argc, TCHAR *argv[])
 	const uint8_t *pc_src, *pc_hack;
 
 	// Other temporaries.
+	const TCHAR *argv0 = argv[0];
 	uint32_t ui32;
 	int ret = EXIT_FAILURE;
 
@@ -249,12 +250,19 @@ int _tmain(int argc, TCHAR *argv[])
 	CONSOLE_SCREEN_BUFFER_INFO csbi;
 	if (GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi) != 0) {
 		bIsExplorer = (csbi.dwCursorPosition.X == 0 && csbi.dwCursorPosition.Y == 0);
+		if (bIsExplorer) {
+			// Truncate argv[0] to only contain the filename.
+			const TCHAR *bs_pos = wcsrchr(argv0, _T('\\'));
+			if (bs_pos) {
+				argv0 = bs_pos + 1;
+			}
+		}
 	}
 
 	if (argc == 1 && bIsExplorer) {
 		// User double-clicked the program.
 		// Show usage information.
-		show_usage(argv[0]);
+		show_usage(argv0);
 		ret = EXIT_SUCCESS;
 		goto cleanup;
 	}
@@ -262,14 +270,14 @@ int _tmain(int argc, TCHAR *argv[])
 
 	if (argc >= 2 && (!_tcscmp(argv[1], _T("-h")) || !_tcscmp(argv[1], _T("--help")))) {
 		// Usage information.
-		show_usage(argv[0]);
+		show_usage(argv0);
 		ret = EXIT_SUCCESS;
 		goto cleanup;
 	}
 
 	if (argc != 3) {
 		_ftprintf(stderr, _T("Syntax: %s [source ROM] [hacked ROM]\n")
-			_T("Try '%s --help' for more information.\n"), argv[0], argv[0]);
+			_T("Try '%s --help' for more information.\n"), argv0, argv0);
 		goto cleanup;
 	}
 
