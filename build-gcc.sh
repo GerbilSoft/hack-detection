@@ -26,6 +26,7 @@ else
 fi
 
 CFLAGS="-O2 -Wall -Wextra -std=c99"
+LDFLAGS="-lm"
 EXE=hack-detection
 DEBUG=hack-detection.debug
 if [ "${ISWIN}" == "1" ]; then
@@ -34,11 +35,12 @@ fi
 
 echo CC=${CC}
 echo CFLAGS=${CFLAGS}
+echo LDFLAGS=${LDFLAGS}
 echo EXE=${EXE}
 echo DEBUG=${DEBUG}
 set -e
 set -v
-${CC} ${CFLAGS} -o ${EXE} hack-detection.c
+${CC} ${CFLAGS} -o ${EXE} hack-detection.c ${LDFLAGS}
 ${OBJCOPY} --only-keep-debug ${EXE} ${DEBUG}
 ${STRIP} ${EXE}
 ${OBJCOPY} --add-gnu-debuglink=${DEBUG} ${EXE}

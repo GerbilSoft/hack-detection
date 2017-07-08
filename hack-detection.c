@@ -31,6 +31,7 @@
 #endif
 
 #include <errno.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
@@ -57,6 +58,7 @@ int _tmain(int argc, TCHAR *argv[])
 	size_t sz;
 	uint32_t sz_check;	// Size to check, after removing padding from the source ROM.
 	uint32_t sz_common;	// Number of bytes the two ROMs have in common.
+	int pct;		// Percentage, times 10.
 	int hack_detection;	// Non-zero if a binary hack is detected.
 
 	// Temporary pointers within p_src/p_hack.
@@ -207,9 +209,17 @@ int _tmain(int argc, TCHAR *argv[])
 		_tprintf(_T("\n"));
 	}
 
-	_tprintf(_T("%u of %u bytes (%0.1f%%) are common between both the\n")
+	if (sz_common == sz_check) {
+		// All bytes match.
+		pct = 1000;
+	} else {
+		// Calculate the percentage.
+		pct = floor(((double)sz_common / (double)sz_check) * 1000);
+	}
+	
+	_tprintf(_T("%u of %u bytes (%01d.%01d%%) are common between both the\n")
 		_T("source ROM and the hacked ROM.\n\n"),
-		sz_common, sz_check, (((double)sz_common / (double)sz_check) * 100.0));
+		sz_common, sz_check, pct/10, pct%10);
 	if (hack_detection) {
 		_tprintf(_T("The hacked ROM is most likely a hex-edited binary hack.\n"));
 	} else {
