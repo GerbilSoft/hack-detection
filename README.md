@@ -32,13 +32,15 @@ These examples use Sonic 1 Rev00 as the source ROM and
 
 ## How to compile
 
-* On Linux, or Windows in MSYS/MinGW: `./build-gcc.sh`
+* On Linux or other Unix-like systems: `./build-gcc.sh`
 * On Windows, using MSVC (2010 or later): Run `build-msvc.bat` from an MSVC command prompt.
 
-It is also possible to cross-compile on Linux for Windows using MinGW-w64:
-```
-TARGET=i686-w64-mingw32 ISWIN=1 ./build-gcc.sh
-```
+Tested on the following platforms:
+
+* Gentoo Linux (amd64)
+* OpenBSD (amd64)
+* Windows XP (i386)
+* Windows 7 (amd64)
 
 ## License
 
